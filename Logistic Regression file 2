@@ -1,0 +1,53 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import mean_absolute_error, accuracy_score
+import os
+
+# 1. Load the Training Data
+
+train_path = 'task1/train.csv'
+
+if os.path.exists(train_path):
+    df = pd.read_csv(train_path)
+
+    # 2. Prepare Features (Original + Edit word)
+    df['text'] = df['original'] + " " + df['edit']
+
+    # 3. Prepare Labels (Round to nearest integer: 0, 1, 2, 3)
+    #  Classification Task
+    df['label_class'] = df['meanGrade'].round().astype(int)
+
+    # 4. Split Data
+    X_train, X_val, y_train, y_val = train_test_split(
+        df['text'],
+        df['label_class'],
+        test_size=0.2,
+        random_state=42
+    )
+
+    # 5. Vectorize (TF-IDF)
+    print("Vectorizing text...")
+    vectorizer = TfidfVectorizer(max_features=5000, stop_words='english')
+    X_train_vec = vectorizer.fit_transform(X_train)
+    X_val_vec = vectorizer.transform(X_val)
+
+    # 6. Train Classifier (Logistic Regression)
+    print("Training Logistic Regression Classifier...")
+    clf = LogisticRegression(max_iter=1000, solver='liblinear')
+    clf.fit(X_train_vec, y_train)
+
+    # 7. Predict & Evaluate
+    preds = clf.predict(X_val_vec)
+
+    mae = mean_absolute_error(y_val, preds)
+    acc = accuracy_score(y_val, preds)
+
+    print("\n--- SECTION 4: PRELIMINARY RESULTS ---")
+    print(f"Model: TF-IDF + Logistic Regression (Classification)")
+    print(f"Mean Absolute Error (MAE): {mae:.4f}")
+    print(f"Accuracy: {acc:.2%}")
+
+else:
+    print("[ERROR] Could not find 'task1/train.csv'.")
