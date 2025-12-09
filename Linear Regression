@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import joblib
 
 # Path configuration
-TRAIN_PATH = "task-1/train.csv"
+TRAIN_PATH = "task1/train.csv"
 
 # Column names in the dataset
 # Edited headline
